@@ -128,7 +128,7 @@ function disablepostedit_activate()
 	);
 	$db->insert_query("templates", $insert_array);
 
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("editpost", "#".preg_quote('{$pollbox}')."#i", '{$pollbox}{$disableedit}');
 	find_replace_templatesets("showthread_inlinemoderation_standard", "#".preg_quote('{$inlinemodapprove}')."#i", '{$inlinemodapprove}{$inlinedisableedit}');
 }
@@ -139,7 +139,7 @@ function disablepostedit_deactivate()
 	global $db;
 	$db->delete_query("templates", "title IN('editpost_disableedit','showthread_inlinemoderation_disableedit')");
 
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("editpost", "#".preg_quote('{$disableedit}')."#i", '', 0);
 	find_replace_templatesets("showthread_inlinemoderation_standard", "#".preg_quote('{$inlinedisableedit}')."#i", '', 0);
 }
