@@ -11,14 +11,17 @@ if(!defined("IN_MYBB"))
 }
 
 // Neat trick for caching our custom template(s)
-if(THIS_SCRIPT == 'editpost.php')
+if(defined('THIS_SCRIPT'))
 {
-	global $templatelist;
-	if(isset($templatelist))
+	if(THIS_SCRIPT == 'editpost.php')
 	{
-		$templatelist .= ',';
+		global $templatelist;
+		if(isset($templatelist))
+		{
+			$templatelist .= ',';
+		}
+		$templatelist .= 'editpost_disableedit';
 	}
-	$templatelist .= 'editpost_disableedit';
 }
 
 // Tell MyBB when to run the hooks
