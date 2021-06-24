@@ -22,6 +22,16 @@ if(defined('THIS_SCRIPT'))
 		}
 		$templatelist .= 'editpost_disableedit';
 	}
+
+	if(THIS_SCRIPT == 'showthread.php')
+	{
+		global $templatelist;
+		if(isset($templatelist))
+		{
+			$templatelist .= ',';
+		}
+		$templatelist .= 'showthread_inlinemoderation_disableedit';
+	}
 }
 
 // Tell MyBB when to run the hooks
@@ -29,6 +39,8 @@ $plugins->add_hook("datahandler_post_update", "disablepostedit_run");
 $plugins->add_hook("editpost_start", "disablepostedit_editpost");
 $plugins->add_hook("postbit", "disablepostedit_postbit");
 $plugins->add_hook("xmlhttp_edit_post_end", "disablepostedit_xmlhttp");
+$plugins->add_hook("showthread_start", "disablepostedit_showthread");
+$plugins->add_hook("moderation_start", "disablepostedit_moderation");
 
 // The information that shows up on the plugin manager
 function disablepostedit_info()
@@ -107,6 +119,15 @@ function disablepostedit_activate()
 	);
 	$db->insert_query("templates", $insert_array);
 
+	$insert_array = array(
+		'title'		=> 'showthread_inlinemoderation_disableedit',
+		'template'	=> $db->escape_string('<option value="multidisableedit">{$lang->inline_disable_editing}</option>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("editpost", "#".preg_quote('{$pollbox}')."#i", '{$pollbox}{$disableedit}');
 	find_replace_templatesets("showthread_inlinemoderation_standard", "#".preg_quote('{$inlinemodapprove}')."#i", '{$inlinemodapprove}{$inlinedisableedit}');
@@ -116,7 +137,7 @@ function disablepostedit_activate()
 function disablepostedit_deactivate()
 {
 	global $db;
-	$db->delete_query("templates", "title IN('editpost_disableedit')");
+	$db->delete_query("templates", "title IN('editpost_disableedit','showthread_inlinemoderation_disableedit')");
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("editpost", "#".preg_quote('{$disableedit}')."#i", '', 0);
@@ -188,4 +209,82 @@ function disablepostedit_xmlhttp()
 	{
 		xmlhttp_error($lang->error_editing_disabled);
 	}
+}
+
+// Add option to show thread mod menu
+function disablepostedit_showthread()
+{
+	global $lang, $templates, $inlinedisableedit, $thread;
+	$lang->load("disablepostedit");
+
+	$inlinedisableedit = '';
+	if(is_moderator($thread['fid'], 'caneditposts'))
+	{
+		eval("\$inlinedisableedit = \"".$templates->get("showthread_inlinemoderation_disableedit")."\";");
+	}
+}
+
+// Run mod option
+function disablepostedit_moderation()
+{
+	global $db, $mybb, $lang, $posts;
+	$lang->load("disablepostedit");
+
+	if($mybb->input['action'] != "multidisableedit")
+	{
+		return;
+	}
+
+	$tid = $mybb->get_input('tid', MyBB::INPUT_INT);
+	$thread = get_thread($tid);
+
+	if($mybb->input['action'] == "multidisableedit")
+	{
+		// Verify incoming POST request
+		verify_post_check($mybb->get_input('my_post_key'));
+
+		if($mybb->get_input('inlinetype') == 'search')
+		{
+			$posts = getids($mybb->get_input('searchid'), 'search');
+		}
+		else
+		{
+			$posts = getids($tid, 'thread');
+		}
+		if(count($posts) < 1)
+		{
+			error($lang->error_inline_nopostsselected, $lang->error);
+		}
+
+		if(!is_moderator_by_pids($posts, "caneditposts"))
+		{
+			error_no_permission();
+		}
+
+		$pids = array();
+		foreach($posts as $pid)
+		{
+			$pids[] = (int)$pid;
+		}
+
+		$pidin = implode(',', $posts);
+		$disable_edit = array(
+			"disableedit" => 1
+		);
+		$db->update_query("posts", $disable_edit, "pid IN({$pidin})");
+
+		log_moderator_action(array("tid" => $thread['tid']), $lang->editing_disabled);
+
+		if($mybb->get_input('inlinetype') == 'search')
+		{
+			clearinline($mybb->get_input('searchid', MyBB::INPUT_INT), 'search');
+		}
+		else
+		{
+			clearinline($tid, 'thread');
+		}
+
+		moderation_redirect(get_thread_link($thread['tid']), $lang->redirect_inline_editingdisabled);
+	}
+	exit;
 }
