@@ -1,2 +1,7 @@
+1.1 (June 24th, 2021)
+- Added check to see if THIS_SCRIPT is defined
+- Added Mod option to bulk disable editing
+- Use require_once for template updates
+
 1.0 (June 23rd, 2017)
 - Initial release

@@ -1,6 +1,6 @@
 ## INFORMATION ##
 
-Disable Post Edit (1.0) for MyBB 1.8
+Disable Post Edit (1.1) for MyBB 1.8
 Created by: Starpaul20
 Copyright: ©2017
 License: GPL
@@ -20,4 +20,4 @@ Editing can be disabled by checking the 'Disable Edit' box on the full edit page
 
 ## UPDATING ##
 
-Any beta version should be reinstalled.
+If you're updating from any previous version, you must first deactivate the plugin, upload all new files and reactivate.
