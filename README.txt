@@ -1,6 +1,6 @@
 ## INFORMATION ##
 
-Disable Post Edit (1.1) for MyBB 1.8
+Disable Post Edit (1.1.1) for MyBB 1.8
 Created by: Starpaul20
 Copyright: ©2017
 License: GPL

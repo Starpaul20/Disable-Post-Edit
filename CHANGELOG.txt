@@ -1,3 +1,6 @@
+1.1.1 (April 9th, 2023)
+- Fixed issue with GZIP
+
 1.1 (June 24th, 2021)
 - Added check to see if THIS_SCRIPT is defined
 - Added Mod option to bulk disable editing
