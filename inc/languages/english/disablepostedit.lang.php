@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Disable Post Edit
  * Copyright 2017 Starpaul20
